@@ -7,6 +7,7 @@ import {AppContent} from "./components/AppContent";
 
 
 function App() {
+    // https://www.youtube.com/watch?v=S4HOy6yTclU&t=1322s
     return (
         <div>
             <Layout >
