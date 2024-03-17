@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {crypto, cryptoBalance, CryptoBalanceType} from "./Data";
+import {cryptoApi, assets, AssetsType} from "../Data";
 
 const axiosConfig = {
     headers: {
@@ -9,20 +9,19 @@ const axiosConfig = {
 }
 
 export const api = {
-    fetchCrypto() {
-        return axios.get<CryptoDataType>("https://openapiv1.coinstats.app/coins", axiosConfig)
-    },
-    fakeFetchCrypto(): Promise<CryptoType> {
-        // return  new Promise((res,rej)=>res(cryptoData))
+    // fetchCrypto() {
+    //     return axios.get<CryptoDataType>("https://openapiv1.coinstats.app/coins", axiosConfig)
+    // },
+    fakeFetchCrypto(): Promise<CryptoType[]> {
         return new Promise(res => setTimeout(() => {
-                res(crypto)
+                res(cryptoApi.data.result)
             }
             , 1000))
     },
-    fakeFetchCryptoBalance(): Promise<CryptoBalanceType> {
+    fakeFetchAssets(): Promise<AssetsType> {
         // return  new Promise((res,rej)=>res(cryptoData))
         return new Promise(res => setTimeout(() => {
-                res(cryptoBalance)
+                res(assets)
             }
             , 500))
     }
@@ -31,14 +30,14 @@ export const api = {
 
 ////////// TYPES
 
-export type CryptoType = {
+export type CryptoApiType = {
     data: CryptoDataType;
 }
 export type CryptoDataType = {
-    result: CryptoDataSingleResultType[];
-    meta: CryptoDataMetaType;
+    result: CryptoType[];
+    meta: CryptoApiMetaType;
 }
-export type CryptoDataSingleResultType = {
+export type CryptoType = {
     id: string;
     icon: string;
     name: string;
@@ -60,7 +59,7 @@ export type CryptoDataSingleResultType = {
     decimals?: number
     explorers: string[];
 }
-type CryptoDataMetaType = {
+type CryptoApiMetaType = {
     page: number;
     limit: number;
     itemCount: number;

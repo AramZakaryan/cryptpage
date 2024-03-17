@@ -1,7 +1,7 @@
 import React from "react";
 import {Layout} from "antd";
 import axios from "axios";
-import {api} from "../api";
+import {api} from "../api/api";
 
 const contentStyle: React.CSSProperties = {
     textAlign: 'center',

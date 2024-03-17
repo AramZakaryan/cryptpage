@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react";
-import {Layout, List, Spin, Statistic, Typography} from "antd";
-import {Card, Space} from 'antd';
-import {ArrowDownOutlined, ArrowUpOutlined} from '@ant-design/icons';
+import {Card, Layout, List, Spin, Statistic, Typography} from "antd";
+import {ArrowUpOutlined, ArrowDownOutlined} from '@ant-design/icons';
 // import 'antd/dist/antd.css'
 import "antd/dist/reset.css"
-import {api, CryptoDataSingleResultType} from "../api";
-import {CryptoBalanceType} from "../Data";
+import {api, CryptoType} from "../api/api";
+import {AssetsType} from "../Data";
+import {AssetViewType} from "../types/types";
+import {growthPercent} from "../utils/utils";
 
 
 const siderStyle: React.CSSProperties = {
@@ -15,16 +16,29 @@ const siderStyle: React.CSSProperties = {
 export const AppSider: React.FC = () => {
 
     const [loading, setLoading] = useState<boolean>(false)
-    const [crypto, setCrypto] = useState<CryptoDataSingleResultType[]>([])
-    const [balance, setBalance] = useState<CryptoBalanceType>([])
+    const [cryptos, setCryptos] = useState<CryptoType[]>([])
+
+    const [assetsView, setAssetsView] = useState<AssetViewType[]>([])
 
     useEffect(() => {
-        (async  ()=> {
+        (async () => {
             setLoading(true)
-            const crypto = await api.fakeFetchCrypto()
-            const balance = await api.fakeFetchCryptoBalance()
-            setCrypto(crypto.data.result)
-            setBalance(balance)
+            const cryptos = await api.fakeFetchCrypto()
+            const assets: AssetsType = await api.fakeFetchAssets()
+
+            setCryptos(cryptos)
+
+            setAssetsView(assets.map(asset => {
+                    const crypto = cryptos.find(crypto => crypto.id === asset.id)
+                    return {
+                        ...asset,
+                        grow: crypto && asset.price < crypto.price,
+                        growthPercent: crypto && growthPercent(asset.price, crypto.price),
+                        totalAmount: crypto && asset.amount * crypto.price,
+                        totalProfit: crypto && asset.amount * (crypto.price - asset.price)
+                    } as AssetViewType
+                }
+            ))
             setLoading(false)
         })()
     }, []);
@@ -34,56 +48,57 @@ export const AppSider: React.FC = () => {
         textAlign: 'center',
     };
 
-    const data = [
-        'Racing car sprays burning fuel into crowd.',
-        'Japanese princess to wed commoner.',
-        'Australian walks 100km after outback crash.',
-        'Man charged over missing wedding girl.',
-        'Los Angeles battles huge wildfires.',
-    ];
+    // const data = [
+    //     'Racing car sprays burning fuel into crowd.',
+    //     'Japanese princess to wed commoner.',
+    //     'Australian walks 100km after outback crash.',
+    //     'Man charged over missing wedding girl.',
+    //     'Los Angeles battles huge wildfires.',
+    // ];
 
-    console.log(crypto)
-    console.log(balance)
+    // console.log(cryptos)
+    // console.log(assetsView)
 
-    if(loading){
+    if (loading) {
         return <Spin size={"large"} fullscreen/>
     }
 
     return (
         <Layout.Sider width="25%" style={siderStyle}>
-            <Card style={{marginBottom: "1rem"}}>
-                <Statistic
-                    title="Active"
-                    value={11.28}
-                    precision={2}
-                    valueStyle={{color: '#3f8600'}}
-                    prefix={<ArrowUpOutlined/>}
-                    suffix="%"
-                />
+            {assetsView.map(assetView =>
+                <Card key={assetView.id} style={{marginBottom: "1rem"}}>
+                    <Statistic
+                        title={assetView.id}
+                        value={assetView.totalAmount}
+                        precision={1}
+                        valueStyle={{color: assetView.grow ? " green" : "red"}}
+                        prefix={assetView.grow ? <ArrowUpOutlined/> : <ArrowDownOutlined/>}
+                        suffix="$"
+                    />
 
-                <List
-                    size={"small"}
-                    header={<div>Header</div>}
-                    footer={<div>Footer</div>}
-                    // bordered
-                    dataSource={data}
-                    renderItem={(item) => (
-                        <List.Item>
-                            <Typography.Text mark>[ITEM]</Typography.Text> {item}
-                        </List.Item>
-                    )}
-                />
-            </Card>
-            <Card bordered={false}>
-                <Statistic
-                    title="Idle"
-                    value={9.3}
-                    precision={2}
-                    valueStyle={{color: '#cf1322'}}
-                    prefix={<ArrowDownOutlined/>}
-                    suffix="%"
-                />
-            </Card>
+                    <List
+                        size={"small"}
+                        header={<div>Header</div>}
+                        footer={<div>Footer</div>}
+                        dataSource={[
+                            {title: "Total Profit", value: assetView.totalProfit},
+                            {title: "Asset Amount", value: assetView.amount},
+                            {title: "Difference", value: assetView.growthPercent},
+
+                        ]}
+                        renderItem={(item) =>
+                            <List.Item>
+                                <span>
+                                    {item.title}
+                                </span>
+                                <span>
+                                    {item.value}
+                                </span>
+                            </List.Item>
+                        }
+                    />
+                </Card>
+            )}
 
 
         </Layout.Sider>

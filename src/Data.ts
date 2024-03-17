@@ -1,6 +1,6 @@
-import {CryptoType} from "./api";
+import {CryptoApiType} from "./api/api";
 
-export const crypto: CryptoType = {
+export const cryptoApi: CryptoApiType = {
     data: {
         result: [
             {
@@ -609,7 +609,7 @@ export const crypto: CryptoType = {
 
 }
 
-export const cryptoBalance:CryptoBalanceType = [
+export const assets:AssetsType = [
     {
         id: "bitcoin",
         amount: 0.02,
@@ -627,9 +627,9 @@ export const cryptoBalance:CryptoBalanceType = [
 
 /////////// TYPES
 
-export type CryptoBalanceType = CryptoSingleBalanceType[]
+export type AssetsType = AssetType[]
 
-type CryptoSingleBalanceType = {
+export type AssetType = {
 	id: string;
 	amount: number;
 	price: number;
